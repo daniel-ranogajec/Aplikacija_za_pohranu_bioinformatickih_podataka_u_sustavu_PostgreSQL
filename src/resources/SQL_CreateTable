@@ -1,0 +1,91 @@
+DROP TABLE IF EXISTS division CASCADE;
+CREATE TABLE division
+(
+  division_id INT NOT NULL,
+  division_cde VARCHAR(3) NOT NULL,
+  division_name VARCHAR NOT NULL,
+  comments VARCHAR,
+  PRIMARY KEY (division_id),
+  UNIQUE (division_cde)
+);
+
+DROP TABLE IF EXISTS gencode CASCADE;
+CREATE TABLE gencode
+(
+  genetic_code_id INT NOT NULL,
+  abbrevation VARCHAR,
+  name VARCHAR NOT NULL,
+  cde VARCHAR,
+  starts VARCHAR,
+  PRIMARY KEY (genetic_code_id)
+);
+
+DROP TABLE IF EXISTS nodes CASCADE;
+CREATE TABLE nodes
+(
+  tax_id INT NOT NULL,
+  parent_tax_id INT NOT NULL,
+  rank VARCHAR NOT NULL,
+  embl_code VARCHAR,
+  division_id INT NOT NULL,
+  inherited_div_flag INT NOT NULL,
+  genetic_code_id INT NOT NULL,
+  inherited_GC_flag INT NOT NULL,
+  mitochondrial_genetic_code_id INT NOT NULL,
+  inherited_MGC_flag INT NOT NULL,
+  genbank_hidden_flag INT NOT NULL,
+  hidden_subtree_root_flag INT NOT NULL,
+  comments VARCHAR,
+  PRIMARY KEY(tax_id),
+  FOREIGN KEY (division_id) REFERENCES division(division_id),
+  FOREIGN KEY (genetic_code_id) REFERENCES gencode(genetic_code_id),
+  FOREIGN KEY (mitochondrial_genetic_code_id) REFERENCES gencode(genetic_code_id)
+);
+
+DROP TABLE IF EXISTS names CASCADE;
+CREATE TABLE names
+(
+  tax_id INT NOT NULL,
+  name_txt VARCHAR NOT NULL,
+  unique_name VARCHAR,
+  name_class VARCHAR NOT NULL,
+  name_id SERIAL,
+  PRIMARY KEY (name_id),
+  FOREIGN KEY (tax_id) REFERENCES nodes(tax_id)
+);
+
+DROP TABLE IF EXISTS reference_genomes;
+CREATE TABLE reference_genomes
+(
+  tax_id INT NOT NULL,
+  file_location VARCHAR NOT NULL,
+  genome_id SERIAL,
+  PRIMARY KEY (genome_id),
+  FOREIGN KEY (tax_id) REFERENCES nodes(tax_id)
+);
+
+DROP TABLE IF EXISTS headers;
+CREATE TABLE headers
+(
+  header VARCHAR NOT NULL,
+  genome_id INT NOT NULL,
+  header_id SERIAL,
+  PRIMARY KEY (header_id),
+  FOREIGN KEY (genome_id) REFERENCES reference_genomes(genome_id)
+);
+
+DROP TABLE IF EXISTS genes;
+CREATE TABLE genes
+(
+  tax_id INT NOT NULL,
+  symbol VARCHAR NOT NULL,
+  gene_id INT NOT NULL,
+  gene_description VARCHAR,
+  organism VARCHAR NOT NULL,
+  genomic_context VARCHAR,
+  annotation VARCHAR,
+  other_aliases VARCHAR,
+  other_designations VARCHAR,
+  PRIMARY KEY(gene_id),
+  FOREIGN KEY (tax_id) REFERENCES nodes(tax_id)
+);
